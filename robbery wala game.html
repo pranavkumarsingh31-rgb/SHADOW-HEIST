@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Shadow Heist - Professional Stealth Game</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            min-height: 100vh;
+            background: #0a0c12;
+            font-family: 'Inter', 'Segoe UI', 'Poppins', monospace;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        .game-container {
+            background: linear-gradient(145deg, #1a1e2a, #0f1219);
+            border-radius: 32px;
+            padding: 20px;
+            box-shadow: 0 25px 45px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+
+        canvas {
+            display: block;
+            margin: 0 auto;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            background: #1a2a2a;
+            cursor: pointer;
+        }
+
+        .game-ui {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 15px;
+            padding: 8px 20px;
+            background: rgba(15, 20, 30, 0.9);
+            border-radius: 60px;
+            backdrop-filter: blur(8px);
+            gap: 15px;
+            flex-wrap: wrap;
+            border: 1px solid rgba(255, 200, 100, 0.3);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            background: #0a0e16;
+            padding: 5px 20px;
+            border-radius: 40px;
+            color: #ffefb9;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .controls-bar {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+            justify-content: center;
+        }
+
+        .ctrl-btn {
+            background: #2a2e3a;
+            border: none;
+            font-size: 1.4rem;
+            padding: 6px 22px;
+            border-radius: 50px;
+            color: #ffdd99;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.05s linear;
+            box-shadow: 0 4px 0 #15181f;
+            font-family: monospace;
+        }
+
+        .ctrl-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #15181f;
+        }
+
+        button {
+            background: #ffaa33;
+            border: none;
+            padding: 5px 18px;
+            border-radius: 40px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.1s;
+            font-family: 'Inter', monospace;
+        }
+
+        .reward-popup {
+            position: fixed;
+            top: 20%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #1e2a1a;
+            color: #ffd966;
+            padding: 12px 28px;
+            border-radius: 60px;
+            font-weight: bold;
+            font-size: 1.2rem;
+            z-index: 3000;
+            animation: fadeOut 1.5s forwards;
+            pointer-events: none;
+            white-space: nowrap;
+            border: 1px solid #ffcc66;
+            box-shadow: 0 0 20px rgba(255,200,0,0.3);
+        }
+
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            70% { opacity: 1; }
+            100% { opacity: 0; transform: translate(-50%, -70%) scale(0.9); }
+        }
+
+        /* PROFESSIONAL HOMEPAGE - SHADOW HEIST THEME */
+        .homepage-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #07090f;
+            z-index: 2000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .homepage-card {
+            max-width: 1200px;
+            width: 90%;
+            background: linear-gradient(135deg, #12161f, #0c0f17);
+            border-radius: 48px;
+            padding: 40px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+            border: 1px solid rgba(255, 200, 100, 0.25);
+            text-align: center;
+        }
+
+        .game-title {
+            font-size: 4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffd966, #ffaa33, #ff8844);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        .game-tagline {
+            color: #8a9a8a;
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+            letter-spacing: 2px;
+            word-spacing: 4px;
+        }
+
+        .subtitle {
+            color: #ffaa33;
+            font-size: 0.85rem;
+            margin-bottom: 30px;
+            border-top: 1px solid rgba(255,200,100,0.3);
+            border-bottom: 1px solid rgba(255,200,100,0.3);
+            display: inline-block;
+            padding: 6px 25px;
+            letter-spacing: 1px;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 35px 0;
+        }
+
+        .feature {
+            background: rgba(20, 25, 35, 0.7);
+            padding: 20px;
+            border-radius: 28px;
+            text-align: center;
+            border: 1px solid rgba(255, 200, 100, 0.2);
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
+        }
+        .feature:hover { border-color: #ffaa33; transform: translateY(-3px); }
+
+        .feature-icon { font-size: 2.5rem; }
+        .feature h3 { color: #ffd966; margin: 12px 0 8px; font-size: 1.1rem; }
+        .feature p { color: #aabbc0; font-size: 0.8rem; }
+
+        .level-selector { margin: 30px 0; background: rgba(10, 15, 22, 0.8); padding: 20px; border-radius: 40px; backdrop-filter: blur(4px); }
+        .level-selector h3 { color: #ffd966; margin-bottom: 18px; font-size: 1.2rem; }
+        .level-buttons { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 80px)); gap: 12px; justify-content: center; max-height: 260px; overflow-y: auto; padding: 10px; }
+        .level-buttons::-webkit-scrollbar { width: 6px; }
+        .level-buttons::-webkit-scrollbar-track { background: #1a1e2a; border-radius: 10px; }
+        .level-buttons::-webkit-scrollbar-thumb { background: #ffaa33; border-radius: 10px; }
+        .level-btn { background: #1e2432; color: #ffdd99; font-size: 1rem; padding: 10px 0; border-radius: 30px; cursor: pointer; text-align: center; font-weight: 600; border: 1px solid #3a3e4a; transition: 0.1s; }
+        .level-btn:hover { background: #ffaa33; color: #0a0c12; border-color: #ffcc66; transform: scale(1.02); }
+        .level-btn.locked { background: #151a24; color: #556677; cursor: not-allowed; opacity: 0.6; border-color: #2a2e3a; }
+        .level-btn.locked:hover { transform: none; background: #151a24; }
+
+        .difficulty-panel { display: flex; justify-content: center; gap: 20px; margin: 25px 0; }
+        .diff-option { background: #1a1f2a; padding: 8px 28px; border-radius: 50px; cursor: pointer; font-weight: 600; color: #bbccbb; transition: 0.1s; border: 1px solid #3a4050; }
+        .diff-option.selected { background: #ffaa33; color: #0a0c12; border-color: #ffdd99; box-shadow: 0 0 12px rgba(255,170,51,0.4); }
+
+        .play-btn {
+            background: linear-gradient(135deg, #ffaa33, #ff8844);
+            font-size: 1.3rem;
+            padding: 14px 40px;
+            border-radius: 60px;
+            color: #0a0c12;
+            font-weight: 700;
+            width: 100%;
+            margin-top: 20px;
+            border: none;
+            cursor: pointer;
+            transition: 0.15s;
+            letter-spacing: 1px;
+        }
+        .play-btn:hover { transform: scale(0.98); filter: brightness(1.05); }
+
+        .youtube-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #ff0000;
+            color: white;
+            padding: 10px 28px;
+            border-radius: 60px;
+            text-decoration: none;
+            font-weight: bold;
+            margin: 15px 0 5px;
+            transition: 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            font-size: 0.9rem;
+        }
+        .youtube-link:hover {
+            background: #cc0000;
+            transform: scale(1.02);
+        }
+
+        .footer-note { text-align: center; margin-top: 20px; color: #6a7a6a; font-size: 0.7rem; }
+
+        /* Store Overlay Professional */
+        .store-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 2500;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .store-card {
+            background: #12161f;
+            border-radius: 48px;
+            padding: 35px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid #ffaa33;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+        .store-card h2 { color: #ffd966; margin-bottom: 20px; font-size: 1.8rem; }
+        .store-item {
+            background: #1a202c;
+            margin: 14px 0;
+            padding: 15px 20px;
+            border-radius: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #e0e0e0;
+            font-weight: 500;
+            border: 1px solid #2a3040;
+        }
+        .buy-btn { background: #ffaa33; padding: 8px 22px; font-size: 0.85rem; font-weight: bold; color: #0a0c12; }
+        .close-btn { margin-top: 20px; background: #2a2e3a; padding: 10px 25px; color: #ffdd99; }
+
+        @media (max-width: 700px) {
+            .ctrl-btn { padding: 4px 16px; font-size: 1.1rem; }
+            .stat { font-size: 0.7rem; gap: 4px; }
+            .game-title { font-size: 2.2rem; }
+            .feature-grid { gap: 12px; }
+            .feature { padding: 12px; }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <canvas id="gameCanvas" width="900" height="600"></canvas>
+    <div class="game-ui">
+        <div class="stats">
+            <div class="stat">?? <span id="coinAmount">500</span></div>
+            <div class="stat">? <span id="levelNum">1</span></div>
+            <div class="stat">?? <span id="healthValue">3</span></div>
+            <div class="stat">?? <span id="distractionCount">2</span></div>
+        </div>
+        <div class="level-info" id="missionText">STEAL THE GEM</div>
+        <button id="restartBtn">?? RESTART</button>
+        <button id="storeBtn">?? STORE</button>
+        <button id="distractBtn">?? DISTRACT</button>
+    </div>
+    <div class="controls-bar">
+        <button class="ctrl-btn" data-dir="up">??</button>
+        <button class="ctrl-btn" data-dir="left">??</button>
+        <button class="ctrl-btn" data-dir="down">??</button>
+        <button class="ctrl-btn" data-dir="right">??</button>
+    </div>
+</div>
+
+<script>
+    (function() {
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const WORLD_W = 900;
+        const WORLD_H = 600;
+        canvas.width = WORLD_W;
+        canvas.height = WORLD_H;
+
+        // GAME STATE
+        let currentLevel = 1;
+        let maxUnlockedLevel = 1;
+        let gameOver = false;
+        let gameWin = false;
+        let scoreCollected = 0;
+        let targetItems = 1;
+        let totalCoins = 500;
+        let playerHealth = 3;
+        let maxHealth = 3;
+        let distractionItems = 2;
+        
+        let treasures = [];
+        let walls = [];
+        let guards = [];
+        let cameras = [];
+        let dogs = [];
+        let distractions = [];
+        let exitZone = { x: 0, y: 0, w: 50, h: 50 };
+        let player = { x: 70, y: 70, radius: 15 };
+        let caughtFlash = 0;
+        let showHomepage = true;
+        
+        let moveKeys = { ArrowUp: false, ArrowDown: false, ArrowLeft: false, ArrowRight: false };
+        let SPEED = 4.2;
+        let currentSpeedBonus = 1.0;
+        
+        let upgrades = {
+            extraHealth: { bought: false, cost: 200 },
+            speedBoost: { bought: false, cost: 150 },
+            distractionMaster: { bought: false, cost: 180 }
+        };
+        
+        function addCoins(amount) {
+            totalCoins += amount;
+            document.getElementById('coinAmount').innerText = totalCoins;
+            showPopup(`+${amount} ??`);
+        }
+        
+        function showPopup(msg) {
+            const div = document.createElement('div');
+            div.className = 'reward-popup';
+            div.innerText = msg;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 1200);
+        }
+        
+        function updateHealthUI() {
+            document.getElementById('healthValue').innerText = `${playerHealth}/${maxHealth}`;
+        }
+        
+        function updateDistractionUI() {
+            document.getElementById('distractionCount').innerText = distractionItems;
+        }
+        
+        function damagePlayer() {
+            if(gameOver || gameWin) return;
+            playerHealth--;
+            updateHealthUI();
+            caughtFlash = 10;
+            if(playerHealth <= 0) {
+                gameOver = true;
+                document.getElementById('missionText').innerHTML = "?? GAME OVER! Press RESTART";
+            } else {
+                document.getElementById('missionText').innerHTML = "?? You got hurt! -1 HP";
+                player.x = 70;
+                player.y = 70;
+                setTimeout(() => {
+                    if(!gameOver && !gameWin) document.getElementById('missionText').innerHTML = `LEVEL ${currentLevel}`;
+                }, 1500);
+            }
+        }
+        
+        function throwDistraction() {
+            if(gameOver || gameWin) return;
+            if(distractionItems <= 0) {
+                showPopup("No distractions! Buy in store!");
+                return;
+            }
+            distractionItems--;
+            updateDistractionUI();
+            distractions.push({ x: player.x, y: player.y, timer: 150, radius: 35 });
+            showPopup("?? Distraction thrown!");
+        }
+        
+        // Guard Class
+        class Guard {
+            constructor(x, y, dir) {
+                this.x = x; this.y = y;
+                this.radius = 16;
+                this.dir = dir;
+                this.visionRange = 140;
+                this.visionAngle = Math.PI / 2.2;
+                this.speed = 1.0;
+                this.distracted = false;
+                this.distractTarget = null;
+                this.distractTimer = 0;
+            }
+            getDirVec() { return [[0,-1],[1,0],[0,1],[-1,0]][this.dir]; }
+            update(index, allGuards) {
+                if(gameOver || gameWin) return;
+                if(this.distractTimer > 0 && this.distractTarget) {
+                    this.distractTimer--;
+                    let dx = this.distractTarget.x - this.x;
+                    let dy = this.distractTarget.y - this.y;
+                    let dist = Math.hypot(dx, dy);
+                    if(dist > 5) {
+                        let step = Math.min(this.speed * 1.3, dist);
+                        let ang = Math.atan2(dy, dx);
+                        this.x += Math.cos(ang) * step;
+                        this.y += Math.sin(ang) * step;
+                    }
+                    this.x = Math.min(Math.max(this.x, this.radius), WORLD_W - this.radius);
+                    this.y = Math.min(Math.max(this.y, this.radius), WORLD_H - this.radius);
+                    return;
+                } else {
+                    this.distracted = false;
+                    this.distractTarget = null;
+                }
+                let vec = this.getDirVec();
+                let newX = this.x + vec[0] * this.speed;
+                let newY = this.y + vec[1] * this.speed;
+                let collide = false;
+                if(newX - this.radius < 0 || newX + this.radius > WORLD_W) collide = true;
+                if(newY - this.radius < 0 || newY + this.radius > WORLD_H) collide = true;
+                for(let w of walls) {
+                    if(newX + this.radius > w.x && newX - this.radius < w.x + w.w && 
+                       newY + this.radius > w.y && newY - this.radius < w.y + w.h) {
+                        collide = true; break;
+                    }
+                }
+                if(collide) this.dir = (this.dir + 2) % 4;
+                else { this.x = newX; this.y = newY; }
+                this.x = Math.min(Math.max(this.x, this.radius), WORLD_W - this.radius);
+                this.y = Math.min(Math.max(this.y, this.radius), WORLD_H - this.radius);
+            }
+            isPlayerInSight(px, py) {
+                if(this.distracted) return false;
+                let dx = px - this.x, dy = py - this.y;
+                let dist = Math.hypot(dx, dy);
+                if(dist > this.visionRange) return false;
+                let angleTo = Math.atan2(dy, dx);
+                let fwd = this.getDirVec();
+                let forwardAngle = Math.atan2(fwd[1], fwd[0]);
+                let diff = Math.abs(angleTo - forwardAngle);
+                diff = Math.min(diff, Math.PI * 2 - diff);
+                if(diff > this.visionAngle / 2) return false;
+                return true;
+            }
+            distract(tx, ty) {
+                this.distracted = true;
+                this.distractTarget = { x: tx, y: ty };
+                this.distractTimer = 100;
+            }
+        }
+        
+        class Camera {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                this.angle = 0;
+                this.dir = 1;
+                this.visionRange = 160;
+                this.coneAngle = Math.PI / 2.4;
+            }
+            update() {
+                this.angle += 0.025 * this.dir;
+                if(this.angle > 1.2) { this.angle = 1.2; this.dir = -1; }
+                if(this.angle < -1.2) { this.angle = -1.2; this.dir = 1; }
+            }
+            isPlayerDetected(px, py) {
+                let dx = px - this.x, dy = py - this.y;
+                let dist = Math.hypot(dx, dy);
+                if(dist > this.visionRange) return false;
+                let angleTo = Math.atan2(dy, dx);
+                let diff = Math.abs(angleTo - this.angle);
+                diff = Math.min(diff, Math.PI * 2 - diff);
+                if(diff > this.coneAngle / 2) return false;
+                return true;
+            }
+            draw() {
+                ctx.fillStyle = "#cc4444";
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "white";
+                ctx.font = "18px monospace";
+                ctx.fillText("??", this.x - 8, this.y - 6);
+                ctx.globalAlpha = 0.25;
+                ctx.fillStyle = "#ff6666";
+                let left = this.angle - this.coneAngle / 2;
+                let right = this.angle + this.coneAngle / 2;
+                ctx.beginPath();
+                ctx.moveTo(this.x, this.y);
+                ctx.lineTo(this.x + Math.cos(left) * this.visionRange, this.y + Math.sin(left) * this.visionRange);
+                ctx.lineTo(this.x + Math.cos(right) * this.visionRange, this.y + Math.sin(right) * this.visionRange);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+        }
+        
+        class Dog {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                this.radius = 12;
+                this.speed = 1.4;
+                this.walkDir = 1;
+            }
+            update() {
+                let newX = this.x + this.walkDir * this.speed;
+                if(newX < 50 || newX > WORLD_W - 50) this.walkDir *= -1;
+                else this.x = newX;
+                this.x = Math.min(Math.max(this.x, this.radius), WORLD_W - this.radius);
+            }
+            isPlayerDetected(px, py) {
+                let dist = Math.hypot(px - this.x, py - this.y);
+                return dist < 90;
+            }
+            draw() {
+                ctx.fillStyle = "#b87a3a";
+                ctx.beginPath();
+                ctx.ellipse(this.x, this.y, 12, 10, 0, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = "#5a3a1a";
+                ctx.fillRect(this.x - 3, this.y - 1, 6, 3);
+                ctx.fillStyle = "white";
+                ctx.font = "20px monospace";
+                ctx.fillText("??", this.x - 9, this.y - 7);
+            }
+        }
+        
+        function generateLevel(level) {
+            let seed = level * 12345;
+            let rng = () => { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; };
+            let treasure = [{ x: 150 + Math.floor(rng() * 650), y: 100 + Math.floor(rng() * 400), value: 50 + Math.floor(level / 8) * 10 }];
+            let exit = { x: WORLD_W - 90 - Math.floor(rng() * 80), y: WORLD_H - 90 - Math.floor(rng() * 80), w: 50, h: 50 };
+            let walls = [];
+            let wallCount = 6 + Math.floor(rng() * 5);
+            for(let i = 0; i < wallCount; i++) {
+                walls.push({ x: 40 + Math.floor(rng() * 820), y: 40 + Math.floor(rng() * 520), w: 45 + Math.floor(rng() * 60), h: 45 + Math.floor(rng() * 60) });
+            }
+            let guards = [];
+            let guardCount = 2 + Math.min(5, Math.floor(level / 12));
+            for(let i = 0; i < guardCount; i++) {
+                guards.push(new Guard(80 + Math.floor(rng() * 750), 80 + Math.floor(rng() * 450), Math.floor(rng() * 4)));
+            }
+            let cameras = [];
+            let cameraCount = Math.min(3, Math.floor(level / 15));
+            for(let i = 0; i < cameraCount; i++) {
+                cameras.push(new Camera(100 + Math.floor(rng() * 700), 80 + Math.floor(rng() * 450)));
+            }
+            let dogs = [];
+            let dogCount = Math.min(2, Math.floor(level / 20));
+            for(let i = 0; i < dogCount; i++) {
+                dogs.push(new Dog(100 + Math.floor(rng() * 700), 80 + Math.floor(rng() * 450)));
+            }
+            return { treasure, exit, walls, guards, cameras, dogs };
+        }
+        
+        let currentLevelData = null;
+        
+        function loadLevel(level) {
+            gameOver = false;
+            gameWin = false;
+            scoreCollected = 0;
+            distractions = [];
+            currentLevelData = generateLevel(level);
+            document.getElementById('levelNum').innerText = level;
+            document.getElementById('missionText').innerHTML = `LEVEL ${level}`;
+            walls = currentLevelData.walls;
+            treasures = currentLevelData.treasure.map(t => ({ ...t, collected: false, radius: 13 }));
+            exitZone = currentLevelData.exit;
+            guards = currentLevelData.guards;
+            cameras = currentLevelData.cameras;
+            dogs = currentLevelData.dogs;
+            targetItems = treasures.length;
+            player.x = 60;
+            player.y = 60;
+            updateHealthUI();
+        }
+        
+        function updateDistractions() {
+            for(let i = 0; i < distractions.length; i++) {
+                distractions[i].timer--;
+                if(distractions[i].timer <= 0) {
+                    distractions.splice(i, 1);
+                    i--;
+                    continue;
+                }
+                for(let g of guards) {
+                    let dist = Math.hypot(g.x - distractions[i].x, g.y - distractions[i].y);
+                    if(dist < 100 && !g.distracted && g.distractTimer <= 0) {
+                        g.distract(distractions[i].x, distractions[i].y);
+                    }
+                }
+            }
+        }
+        
+        function tryMove(dx, dy) {
+            if(gameOver || gameWin) return;
+            let spd = SPEED * currentSpeedBonus;
+            let newX = player.x + dx * spd;
+            let newY = player.y + dy * spd;
+            newX = Math.min(Math.max(newX, player.radius), WORLD_W - player.radius);
+            newY = Math.min(Math.max(newY, player.radius), WORLD_H - player.radius);
+            for(let w of walls) {
+                if(newX + player.radius > w.x && newX - player.radius < w.x + w.w &&
+                   newY + player.radius > w.y && newY - player.radius < w.y + w.h) {
+                    return;
+                }
+            }
+            player.x = newX;
+            player.y = newY;
+        }
+        
+        function handleMovement() {
+            if(gameOver || gameWin) return;
+            let dx = 0, dy = 0;
+            if(moveKeys.ArrowUp) dy -= 1;
+            if(moveKeys.ArrowDown) dy += 1;
+            if(moveKeys.ArrowLeft) dx -= 1;
+            if(moveKeys.ArrowRight) dx += 1;
+            if(dx !== 0 || dy !== 0) {
+                let len = Math.hypot(dx, dy);
+                dx /= len;
+                dy /= len;
+                tryMove(dx, dy);
+            }
+        }
+        
+        function updateGame() {
+            if(gameOver || gameWin) return;
+            for(let t of treasures) {
+                if(!t.collected && Math.hypot(player.x - t.x, player.y - t.y) < player.radius + t.radius) {
+                    t.collected = true;
+                    scoreCollected++;
+                    addCoins(t.value);
+                    if(scoreCollected >= targetItems) {
+                        document.getElementById('missionText').innerHTML = "?? FIND THE EXIT!";
+                    }
+                }
+            }
+            for(let g of guards) {
+                if(Math.hypot(player.x - g.x, player.y - g.y) < player.radius + g.radius) { damagePlayer(); return; }
+                if(g.isPlayerInSight(player.x, player.y)) { damagePlayer(); return; }
+            }
+            for(let c of cameras) {
+                if(c.isPlayerDetected(player.x, player.y)) { damagePlayer(); return; }
+            }
+            for(let d of dogs) {
+                if(d.isPlayerDetected(player.x, player.y) || Math.hypot(player.x - d.x, player.y - d.y) < player.radius + d.radius) {
+                    damagePlayer(); return;
+                }
+            }
+            if(scoreCollected >= targetItems && !gameWin) {
+                if(player.x + player.radius > exitZone.x && player.x - player.radius < exitZone.x + exitZone.w &&
+                   player.y + player.radius > exitZone.y && player.y - player.radius < exitZone.y + exitZone.h) {
+                    gameWin = true;
+                    let reward = 80 + currentLevel * 3;
+                    addCoins(reward);
+                    if(currentLevel === maxUnlockedLevel && currentLevel < 120) {
+                        maxUnlockedLevel = currentLevel + 1;
+                        showPopup(`?? LEVEL ${currentLevel + 1} UNLOCKED!`);
+                    }
+                    document.getElementById('missionText').innerHTML = `?? COMPLETE! +${reward} COINS`;
+                    setTimeout(() => {
+                        if(currentLevel < 120 && gameWin) {
+                            currentLevel++;
+                            loadLevel(currentLevel);
+                            gameWin = false;
+                        }
+                    }, 2000);
+                }
+            }
+        }
+        
+        function updateEntities() {
+            for(let g of guards) g.update(0, guards);
+            for(let c of cameras) c.update();
+            for(let d of dogs) d.update();
+            updateDistractions();
+        }
+        
+        function draw() {
+            ctx.fillStyle = "#1e2a2a";
+            ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+            for(let i = 0; i < WORLD_W; i += 40) {
+                for(let j = 0; j < WORLD_H; j += 40) {
+                    ctx.fillStyle = (i + j) % 80 === 0 ? "#2a4a3a" : "#1e3a2e";
+                    ctx.fillRect(i, j, 38, 38);
+                }
+            }
+            for(let w of walls) {
+                ctx.fillStyle = "#5a4a3a";
+                ctx.fillRect(w.x, w.y, w.w, w.h);
+                ctx.fillStyle = "#7a6a5a";
+                ctx.fillRect(w.x + 4, w.y + 4, w.w - 8, w.h - 8);
+            }
+            for(let t of treasures) {
+                if(!t.collected) {
+                    ctx.fillStyle = "#ffcc44";
+                    ctx.beginPath();
+                    ctx.ellipse(t.x, t.y, 12, 14, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.font = "26px monospace";
+                    ctx.fillStyle = "#ff8800";
+                    ctx.fillText("??", t.x - 11, t.y + 9);
+                }
+            }
+            ctx.fillStyle = "#c97e2e";
+            ctx.fillRect(exitZone.x, exitZone.y, exitZone.w, exitZone.h);
+            ctx.fillStyle = "#e0a060";
+            ctx.fillRect(exitZone.x + 6, exitZone.y + 6, exitZone.w - 12, exitZone.h - 12);
+            ctx.font = "24px monospace";
+            ctx.fillStyle = "#4a2a1a";
+            ctx.fillText("??", exitZone.x + 14, exitZone.y + 36);
+            for(let g of guards) {
+                ctx.fillStyle = "#4a3a6a";
+                ctx.beginPath();
+                ctx.arc(g.x, g.y, g.radius - 2, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.font = "20px monospace";
+                ctx.fillStyle = "#ffcc88";
+                ctx.fillText("??", g.x - 11, g.y - 6);
+                ctx.globalAlpha = 0.2;
+                ctx.fillStyle = "#ffaa66";
+                let vec = g.getDirVec();
+                let ang = Math.atan2(vec[1], vec[0]);
+                ctx.beginPath();
+                ctx.moveTo(g.x, g.y);
+                let left = ang - g.visionAngle / 2;
+                let right = ang + g.visionAngle / 2;
+                ctx.lineTo(g.x + Math.cos(left) * g.visionRange, g.y + Math.sin(left) * g.visionRange);
+                ctx.lineTo(g.x + Math.cos(right) * g.visionRange, g.y + Math.sin(right) * g.visionRange);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+            for(let c of cameras) c.draw();
+            for(let d of dogs) d.draw();
+            for(let d of distractions) {
+                ctx.fillStyle = "rgba(255, 160, 0, 0.5)";
+                ctx.beginPath();
+                ctx.arc(d.x, d.y, 14, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.font = "20px monospace";
+                ctx.fillStyle = "#ff8800";
+                ctx.fillText("??", d.x - 8, d.y - 8);
+            }
+            ctx.shadowBlur = 6;
+            if(caughtFlash > 0) { ctx.fillStyle = "#ff7777"; caughtFlash--; }
+            else { ctx.fillStyle = "#5cad7a"; }
+            ctx.beginPath();
+            ctx.arc(player.x, player.y, player.radius - 1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#ffd9a5";
+            ctx.beginPath();
+            ctx.arc(player.x - 4, player.y - 4, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#2a2a2a";
+            ctx.fillRect(player.x - 6, player.y - 2, 12, 5);
+            ctx.font = "26px monospace";
+            ctx.fillStyle = "#1a1a1a";
+            ctx.fillText("???", player.x - 9, player.y - 8);
+            ctx.shadowBlur = 0;
+            if(gameOver) {
+                ctx.globalAlpha = 0.85;
+                ctx.fillStyle = "#1a0a0a";
+                ctx.fillRect(0, 0, WORLD_W, WORLD_H);
+                ctx.globalAlpha = 1;
+                ctx.fillStyle = "#ffcc88";
+                ctx.font = "bold 28px monospace";
+                ctx.fillText("? GAME OVER", WORLD_W / 2 - 85, WORLD_H / 2);
+            }
+        }
+        
+        // PROFESSIONAL HOMEPAGE - SHADOW HEIST
+        function createHomepage() {
+            const overlay = document.createElement('div');
+            overlay.className = 'homepage-overlay';
+            overlay.innerHTML = `
+                <div class="homepage-card">
+                    <div class="game-title">?? SHADOW HEIST</div>
+                    <div class="game-tagline">STEAL IN SILENCE. VANISH IN DARKNESS.</div>
+                    <div class="subtitle">PROFESSIONAL STEALTH OPERATION</div>
+                    <div class="feature-grid">
+                        <div class="feature"><div class="feature-icon">??</div><h3>120+ DYNAMIC MISSIONS</h3><p>Procedural generation, endless replay</p></div>
+                        <div class="feature"><div class="feature-icon">??</div><h3>ADVANCED SECURITY</h3><p>Guards, Cameras & Patrol Dogs</p></div>
+                        <div class="feature"><div class="feature-icon">??</div><h3>TACTICAL DISTRACTIONS</h3><p>Throw bait to escape & outsmart AI</p></div>
+                        <div class="feature"><div class="feature-icon">??</div><h3>BLACK MARKET</h3><p>Upgrades, health & speed boosts</p></div>
+                    </div>
+                    <div class="level-selector">
+                        <h3>??? SELECT HEIST (Unlocked: ${maxUnlockedLevel}/120)</h3>
+                        <div class="level-buttons" id="homeLevelGrid"></div>
+                    </div>
+                    <div class="difficulty-panel">
+                        <div class="diff-option" data-diff="EASY">?? EASY MODE</div>
+                        <div class="diff-option selected" data-diff="NORMAL">? NORMAL MODE</div>
+                        <div class="diff-option" data-diff="HARD">?? HARD MODE</div>
+                    </div>
+                    <a href="https://www.youtube.com/@optimisticandsucess-y4j" target="_blank" class="youtube-link">
+                        ?? SUBSCRIBE ON YOUTUBE @optimisticandsucess-y4j ??
+                    </a>
+                    <button class="play-btn" id="startGameBtn">?? BEGIN THE HEIST</button>
+                    <div class="footer-note">? ? ? ? or BUTTONS | [D] Distraction | [R] Restart | Steal the gem & escape!</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            const grid = overlay.querySelector('#homeLevelGrid');
+            for(let i = 1; i <= 120; i++) {
+                const btn = document.createElement('div');
+                btn.className = `level-btn ${i <= maxUnlockedLevel ? '' : 'locked'}`;
+                btn.innerText = i;
+                if(i <= maxUnlockedLevel) {
+                    btn.onclick = () => { currentLevel = i; loadLevel(currentLevel); };
+                }
+                grid.appendChild(btn);
+            }
+            overlay.querySelectorAll('.diff-option').forEach(opt => {
+                opt.onclick = () => {
+                    overlay.querySelectorAll('.diff-option').forEach(o => o.classList.remove('selected'));
+                    opt.classList.add('selected');
+                    let diff = opt.getAttribute('data-diff');
+                    if(diff === 'EASY') { SPEED = 4.8; }
+                    else if(diff === 'HARD') { SPEED = 3.5; }
+                    else { SPEED = 4.2; }
+                };
+            });
+            overlay.querySelector('#startGameBtn').onclick = () => {
+                overlay.remove();
+                showHomepage = false;
+                loadLevel(currentLevel);
+                gameOver = false;
+                gameWin = false;
+            };
+        }
+        
+        function openStore() {
+            const overlay = document.createElement('div');
+            overlay.className = 'store-overlay';
+            overlay.innerHTML = `
+                <div class="store-card">
+                    <h2>?? SHADOW MARKET</h2>
+                    <p style="color:#bbaa88; margin-bottom:15px; font-weight:bold;">?? HEIST CREDITS: ${totalCoins}</p>
+                    <div class="store-item"><span>?? EXTRA HEALTH (+2 max HP)</span><button class="buy-btn" data-item="health">${upgrades.extraHealth.bought ? "OWNED" : "200??"}</button></div>
+                    <div class="store-item"><span>? SPEED BOOST (Faster movement)</span><button class="buy-btn" data-item="speed">${upgrades.speedBoost.bought ? "OWNED" : "150??"}</button></div>
+                    <div class="store-item"><span>?? DISTRACTION MASTER (+3 bombs)</span><button class="buy-btn" data-item="distraction">${upgrades.distractionMaster.bought ? "OWNED" : "180??"}</button></div>
+                    <div class="store-item"><span>?? SINGLE DISTRACTION</span><button class="buy-btn" data-item="single">20??</button></div>
+                    <button class="close-btn" id="closeStore">CLOSE</button>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+            const updateStore = () => { overlay.querySelector('p').innerHTML = `?? HEIST CREDITS: ${totalCoins}`; };
+            overlay.querySelectorAll('.buy-btn').forEach(btn => {
+                btn.onclick = () => {
+                    const item = btn.getAttribute('data-item');
+                    if(item === 'health' && !upgrades.extraHealth.bought && totalCoins >= 200) {
+                        totalCoins -= 200; upgrades.extraHealth.bought = true; maxHealth = 5;
+                        playerHealth = Math.min(playerHealth + 2, maxHealth); updateHealthUI();
+                        updateStore(); document.getElementById('coinAmount').innerText = totalCoins;
+                        showPopup("Health upgraded!"); btn.innerText = "OWNED";
+                    } else if(item === 'speed' && !upgrades.speedBoost.bought && totalCoins >= 150) {
+                        totalCoins -= 150; upgrades.speedBoost.bought = true; currentSpeedBonus = 1.25;
+                        updateStore(); document.getElementById('coinAmount').innerText = totalCoins;
+                        showPopup("Speed Boost active!"); btn.innerText = "OWNED";
+                    } else if(item === 'distraction' && !upgrades.distractionMaster.bought && totalCoins >= 180) {
+                        totalCoins -= 180; upgrades.distractionMaster.bought = true; distractionItems += 3;
+                        updateDistractionUI(); updateStore(); document.getElementById('coinAmount').innerText = totalCoins;
+                        showPopup("+3 Distractions!"); btn.innerText = "OWNED";
+                    } else if(item === 'single' && totalCoins >= 20) {
+                        totalCoins -= 20; distractionItems++; updateDistractionUI();
+                        updateStore(); document.getElementById('coinAmount').innerText = totalCoins;
+                        showPopup("+1 Distraction!");
+                    } else { showPopup("Insufficient credits!"); }
+                };
+            });
+            overlay.querySelector('#closeStore').onclick = () => overlay.remove();
+        }
+        
+        function bindEvents() {
+            window.addEventListener('keydown', (e) => {
+                if(moveKeys.hasOwnProperty(e.key)) { e.preventDefault(); moveKeys[e.key] = true; }
+                if(e.key === 'r' || e.key === 'R') { loadLevel(currentLevel); gameOver = false; gameWin = false; }
+                if(e.key === 'd' || e.key === 'D') throwDistraction();
+            });
+            window.addEventListener('keyup', (e) => { if(moveKeys.hasOwnProperty(e.key)) moveKeys[e.key] = false; });
+            document.querySelectorAll('.ctrl-btn').forEach(btn => {
+                const dir = btn.getAttribute('data-dir');
+                const key = `Arrow${dir.charAt(0).toUpperCase() + dir.slice(1)}`;
+                btn.addEventListener('mousedown', () => moveKeys[key] = true);
+                btn.addEventListener('mouseup', () => moveKeys[key] = false);
+                btn.addEventListener('touchstart', (e) => { e.preventDefault(); moveKeys[key] = true; });
+                btn.addEventListener('touchend', () => moveKeys[key] = false);
+            });
+            document.getElementById('restartBtn').onclick = () => { loadLevel(currentLevel); gameOver = false; gameWin = false; };
+            document.getElementById('storeBtn').onclick = () => openStore();
+            document.getElementById('distractBtn').onclick = () => throwDistraction();
+        }
+        
+        function gameLoop() {
+            if(!showHomepage) {
+                handleMovement();
+                updateEntities();
+                updateGame();
+                draw();
+            } else { draw(); }
+            requestAnimationFrame(gameLoop);
+        }
+        
+        createHomepage();
+        bindEvents();
+        gameLoop();
+    })();
+</script>
+</body>
+</html>
